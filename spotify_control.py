@@ -19,7 +19,8 @@ SAMPLE_RATE = 44100
 CHANNELS = 2
 BITS = 16
 SAMPLE_SIZE = (SAMPLE_RATE * BITS * CHANNELS) // 8
-CHUNK_SIZE = SAMPLE_SIZE // 4
+CHUNK_SIZE = SAMPLE_SIZE // 4  # ~ 0.25 seconds
+BUFFER_SIZE = SAMPLE_SIZE  # ~ 1 second
 
 
 class SpotifyAuthManger(SpotifyOAuth):
@@ -409,7 +410,7 @@ class SpotifyController:
             self.socket_io_r, self.socket_io_w = os.pipe()
             self.is_listening = True
             audio_thread = Thread(target=audio_listener_thread,
-                                  args=[self, self.port, os.fdopen(self.socket_io_w, 'wb', buffering=0)])
+                                  args=[self, self.port, os.fdopen(self.socket_io_w, 'wb', buffering=BUFFER_SIZE)])
             self.audio_thread = audio_thread
             audio_thread.start()
         else:
