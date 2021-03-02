@@ -23,7 +23,7 @@ create table spotify_details
 		constraint spotify_details_pk
 			primary key,
 	username text,
-	oauth_token_info text
+	oauth_refresh text
 );
 
 create unique index spotify_details_discord_uid_uindex
