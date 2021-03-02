@@ -79,8 +79,8 @@ if __name__ == '__main__':
     prefix = config['prefix']
     print(f"Bot prefix is '{prefix}'", flush=True)
 
-    webapp_thread = threading.Thread(target=webapp.app.run, kwargs={'host': config['http_port'],
-                                                                    'port': config['http_host']})
+    webapp_thread = threading.Thread(target=webapp.app.run, kwargs={'host': config['http_host'],
+                                                                    'port': config['http_port']})
     webapp_thread.start()
 
     client = commands.Bot(command_prefix=commands.when_mentioned_or(prefix))
