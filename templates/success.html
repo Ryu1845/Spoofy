@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Spoofy - Done!</title>
+</head>
+<body>
+<h2>Spotify link success!</h2>
+<p>
+    {% if nick %}Hello {{ nick }}!{% else %}Hello!{% endif %}
+    {% if avatar %}<img src="{{ avatar }}" alt="{{ nick }}'s avatar" width="100" height="100" />{% endif %}
+</p>
+<p>
+    Your Spotify account was successfully linked! You can now use the bot properly. You can close this tab now.
+</p>
+<p>
+    Spotify info:
+</p>
+{% if info %}
+    <p>Name: {{ info.display_name }}</p>
+    <p>Avatar:
+        {% if info.images|length != 0 %}
+            <img src="{{ info.images.0.url }}" alt="{{ info.display_name }}'s avatar" width="100" height="100" />
+        {% else %}
+            None
+        {% endif %}
+{% else %}
+    <p>Unknown account? No info was available...</p>
+{% endif %}
+</body>
+</html>

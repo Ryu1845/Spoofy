@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Spoofy - Login</title>
+</head>
+<body>
+<h2>Please link your Spotify account</h2>
+<p>
+    {% if nick %}Hello {{ nick }}!{% else %}Hello!{% endif %}
+    {% if avatar %}<img src="{{ avatar }}" alt="{{ nick }}'s avatar" width="100" height="100" />{% endif %}
+</p>
+<p>
+    Spoofy needs access to the Spotify API, to be able to control the client player application.
+</p>
+<p>
+    You will be redirected to Spotify to login and give us that access. We won't be able to do anything else except
+    control the playback via the bot player. You can always revoke the access again from your Spotify Account settings,
+    or by unlinking the bot via Discord.
+</p>
+<p>
+    While the bot is playing music from your account, you will not be able to listen to music yourself,
+    but you will be able to see and control what the bot is playing in your own Spotify client.
+</p>
+
+<form method="post">
+    <p><input type="submit" value="Go to Spotify" /></p>
+</form>
+
+</body>
+</html>

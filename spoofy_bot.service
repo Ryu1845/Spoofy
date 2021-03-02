@@ -1,0 +1,11 @@
+[Unit]
+Description=Discord bot that can play music from Spotify accounts.
+
+[Service]
+Type=simple
+ExecStart=/opt/spoofy_bot/run.sh
+StandardOutput=syslog+console
+StandardError=syslog+console
+
+[Install]
+WantedBy=multi-user.target

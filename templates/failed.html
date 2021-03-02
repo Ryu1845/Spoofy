@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Spoofy - Failed</title>
+</head>
+<body>
+<h2>Spotify link failed</h2>
+<p>
+    {% if nick %}Hello {{ nick }}!{% else %}Hello!{% endif %}
+    {% if avatar %}<img src="{{ avatar }}" alt="{{ nick }}'s avatar" width="100" height="100" />{% endif %}
+</p>
+<p>
+    Unfortunately linking your Spotify account failed for some reason. Please request a new link from the bot to try again.
+</p>
+</body>
+</html>
