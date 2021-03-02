@@ -239,7 +239,8 @@ class SpoofyBot(commands.Cog):
 
         # If link, queue by link
         if query.startswith("http://") or query.startswith("https://"):
-            if m := SPOTIFY_LINK_REGEX.match(query):
+            m = SPOTIFY_LINK_REGEX.match(query)
+            if m:
                 uri = f"spotify:{m.group('type')}:{m.group('id')}"
                 item_type = m.group('type')
                 if item_type == "track":
@@ -271,7 +272,8 @@ class SpoofyBot(commands.Cog):
 
         # If spotify uri, queue by link
         if uri is None:
-            if m := SPOTIFY_URI_REGEX.match(query):
+            m = SPOTIFY_URI_REGEX.match(query)
+            if m:
                 uri = f"spotify:{m.group('type')}:{m.group('id')}"
                 item_type = m.group('type')
                 if item_type == "track":
