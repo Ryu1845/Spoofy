@@ -1,6 +1,7 @@
 .idea/
 __pycache__/
 .venv/
+venv/
 db.sqlite
 db.sqlite3
 config.json
