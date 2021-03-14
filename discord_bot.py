@@ -21,6 +21,34 @@ SPOTIFY_LINK_REGEX = re.compile(r"http(s)?://open\.spotify\.com/(?P<type>[a-zA-Z
 SPOTIFY_URI_REGEX = re.compile(r"spotify:(?P<type>[a-zA-Z]+):(?P<id>[0-9a-zA-Z]+)")
 
 
+async def spotify_cmd_err(bot_config, ctx):
+    if ctx.guild is None:
+        await ctx.reply("This command can only be used in a server, not in DMs.")
+        raise commands.CommandError("Invoker not in a guild.")
+
+    if ctx.voice_client is None or ctx.voice_client.channel is None:
+        await ctx.reply(f"I am not in a voice channel, invite me first with `{bot_config['prefix']}join`.")
+        raise commands.CommandError("Bot not connected to a voice channel.")
+
+    if ctx.author.voice is None or ctx.author.voice.channel is None:
+        await ctx.reply("You need to be in a voice channel to use this command.")
+        raise commands.CommandError("Invoker not connected to a voice channel.")
+
+    if ctx.voice_client is not None and ctx.author.voice.channel != ctx.voice_client.channel:
+        await ctx.reply("You need to be in the same voice channel as the bot to use this command.")
+        raise commands.CommandError("Invoker not in same voice channel as bot.")
+
+    if ctx.voice_client is not None and ctx.voice_client.channel is not None:
+        controller = SpotifyController.get_instance(ctx.voice_client.channel.id)
+        if controller is None:
+            await ctx.reply(f"I'm not playing anything at the moment.")
+            raise commands.CommandError("Bot not connected to active spotify session.")
+    else:
+        await ctx.reply(f"I am not in a voice channel, invite me first with `{bot_config['prefix']}join`.")
+        raise commands.CommandError("Bot not connected to a voice channel.")
+    return controller
+
+
 class SpoofyBot(commands.Cog):
     def __init__(self, client, config, *args, **kwargs):
         super(SpoofyBot, self).__init__(*args, **kwargs)
@@ -29,11 +57,11 @@ class SpoofyBot(commands.Cog):
 
     @commands.Cog.listener()
     async def on_connect(self):
-        print(f"Connected, preparing...", flush=True)
+        print("Connected, preparing...", flush=True)
 
     @commands.Cog.listener()
     async def on_disconnect(self):
-        print(f"Bot has disconnected from discord.", flush=True)
+        print("Bot has disconnected from discord.", flush=True)
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -223,7 +251,7 @@ class SpoofyBot(commands.Cog):
         if ctx.voice_client is not None and ctx.voice_client.channel is not None:
             controller = SpotifyController.get_instance(ctx.voice_client.channel.id)
             if controller is None:
-                await ctx.reply(f"I'm not playing anything at the moment.")
+                await ctx.reply("I'm not playing anything at the moment.")
                 raise commands.CommandError("Bot not connected to active spotify session.")
         else:
             await ctx.reply(f"I am not in a voice channel, invite me first with `{self.bot_config['prefix']}join`.")
@@ -247,19 +275,19 @@ class SpoofyBot(commands.Cog):
                     try:
                         item_info = sp.track(m.group('id'))
                     except SpotifyException:
-                        await ctx.send(f"Cannot add! Invalid track!")
+                        await ctx.send("Cannot add! Invalid track!")
                         return
                 elif item_type == "album":
                     try:
                         item_info = sp.album(m.group('id'))
                     except SpotifyException:
-                        await ctx.send(f"Cannot add! Invalid album!")
+                        await ctx.send("Cannot add! Invalid album!")
                         return
                 elif item_type == "playlist":
                     try:
                         item_info = sp.playlist(m.group('id'))
                     except SpotifyException:
-                        await ctx.send(f"Cannot add! Invalid or private playlist!")
+                        await ctx.send("Cannot add! Invalid or private playlist!")
                         return
                 else:
                     await ctx.send(f"Type {item_type} not supported!")
@@ -267,7 +295,7 @@ class SpoofyBot(commands.Cog):
 
                 print(f"Converted link to ID '{uri}'")
             else:
-                await ctx.send(f"Only spotify links are supported!")
+                await ctx.send("Only spotify links are supported!")
                 return
 
         # If spotify uri, queue by link
@@ -280,19 +308,19 @@ class SpoofyBot(commands.Cog):
                     try:
                         item_info = sp.track(m.group('id'))
                     except SpotifyException:
-                        await ctx.send(f"Cannot add! Invalid track!")
+                        await ctx.send("Cannot add! Invalid track!")
                         return
                 elif item_type == "album":
                     try:
                         item_info = sp.album(m.group('id'))
                     except SpotifyException:
-                        await ctx.send(f"Cannot add! Invalid album!")
+                        await ctx.send("Cannot add! Invalid album!")
                         return
                 elif item_type == "playlist":
                     try:
                         item_info = sp.playlist(m.group('id'))
                     except SpotifyException:
-                        await ctx.send(f"Cannot add! Invalid or private playlist!")
+                        await ctx.send("Cannot add! Invalid or private playlist!")
                         return
                 else:
                     await ctx.send(f"Type {item_type} not supported!")
@@ -301,7 +329,7 @@ class SpoofyBot(commands.Cog):
 
         # Else, try to search
         if uri is None:
-            await ctx.send(f'Searching not supported yet.')
+            await ctx.send('Searching not supported yet.')
             return
 
         # Add URI
@@ -385,7 +413,7 @@ class SpoofyBot(commands.Cog):
         controller = SpotifyController.get_instance(ctx.voice_client.channel.id)
         controller.stop_playlist_playback()
         controller.clear_playlist()
-        await ctx.send(f"Queue cleared!")
+        await ctx.send("Queue cleared!")
 
     @commands.command(aliases=['q'])
     async def queue(self, ctx):
@@ -411,7 +439,7 @@ class SpoofyBot(commands.Cog):
         if ctx.voice_client is not None and ctx.voice_client.channel is not None:
             controller = SpotifyController.get_instance(ctx.voice_client.channel.id)
             if controller is None:
-                await ctx.reply(f"I'm not playing anything at the moment.")
+                await ctx.reply("I'm not playing anything at the moment.")
                 raise commands.CommandError("Bot not connected to active spotify session.")
         else:
             await ctx.reply(f"I am not in a voice channel, invite me first with `{self.bot_config['prefix']}join`.")
@@ -482,30 +510,7 @@ class SpoofyBot(commands.Cog):
         """
         Show the currently playing song
         """
-        if ctx.guild is None:
-            await ctx.reply("This command can only be used in a server, not in DMs.")
-            raise commands.CommandError("Invoker not in a guild.")
-
-        if ctx.voice_client is None or ctx.voice_client.channel is None:
-            await ctx.reply(f"I am not in a voice channel, invite me first with `{self.bot_config['prefix']}join`.")
-            raise commands.CommandError("Bot not connected to a voice channel.")
-
-        if ctx.author.voice is None or ctx.author.voice.channel is None:
-            await ctx.reply("You need to be in a voice channel to use this command.")
-            raise commands.CommandError("Invoker not connected to a voice channel.")
-
-        if ctx.voice_client is not None and ctx.author.voice.channel != ctx.voice_client.channel:
-            await ctx.reply("You need to be in the same voice channel as the bot to use this command.")
-            raise commands.CommandError("Invoker not in same voice channel as bot.")
-
-        if ctx.voice_client is not None and ctx.voice_client.channel is not None:
-            controller = SpotifyController.get_instance(ctx.voice_client.channel.id)
-            if controller is None:
-                await ctx.reply(f"I'm not playing anything at the moment.")
-                raise commands.CommandError("Bot not connected to active spotify session.")
-        else:
-            await ctx.reply(f"I am not in a voice channel, invite me first with `{self.bot_config['prefix']}join`.")
-            raise commands.CommandError("Bot not connected to a voice channel.")
+        controller = await spotify_cmd_err(self.bot_config, ctx)
 
         sp = controller.get_api()
         info = sp.current_playback()
@@ -529,6 +534,44 @@ class SpoofyBot(commands.Cog):
             msg_embed.set_thumbnail(url=thumbnail['url'])
             msg_embed.set_footer(text=f"{SpotifyController.format_progress(info)}")
             await ctx.reply(embed=msg_embed)
+        else:
+            await ctx.send("Not playing anything at the moment...")
+
+    @commands.command()
+    async def pause(self, ctx):
+        """
+        Pause the currently playing song
+        """
+        controller = await spotify_cmd_err(self.bot_config, ctx)
+
+        sp = controller.get_api()
+        info = sp.current_playback()
+        if not controller.is_playing_on_bot():
+            await ctx.send("Not playing anything at the moment...")
+            return
+
+        if info is not None:
+            sp.pause_playback()
+            await ctx.add_reaction("👍")
+        else:
+            await ctx.send("Not playing anything at the moment...")
+
+    @commands.command(aliases=['r'])
+    async def resume(self, ctx):
+        """
+        Resume the currently paused song
+        """
+        controller = await spotify_cmd_err(self.bot_config, ctx)
+
+        sp = controller.get_api()
+        info = sp.current_playback()
+        if not controller.is_playing_on_bot():
+            await ctx.send("Not playing anything at the moment...")
+            return
+
+        if info is not None:
+            sp.start_playback()
+            await ctx.add_reaction("👍")
         else:
             await ctx.send("Not playing anything at the moment...")
 
